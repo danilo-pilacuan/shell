@@ -1,0 +1,30 @@
+﻿.shell-header {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  padding: 0.75rem 1.5rem;
+  border-bottom: 1px solid #ddd;
+
+  .shell-title {
+    font-weight: 600;
+  }
+
+  nav {
+    display: flex;
+    gap: 1rem;
+
+    a {
+      text-decoration: none;
+      color: #333;
+
+      &.active {
+        font-weight: 600;
+        border-bottom: 2px solid #1976d2;
+      }
+    }
+  }
+}
+
+.shell-content {
+  padding: 1.5rem;
+}
