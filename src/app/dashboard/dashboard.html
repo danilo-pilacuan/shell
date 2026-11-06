@@ -1,0 +1,30 @@
+<h2>Dashboard</h2>
+
+<div class="selector-proyecto">
+  <label for="proyecto-dashboard">Proyecto</label>
+  <select id="proyecto-dashboard" (change)="cambiarProyecto($event)" [value]="proyectoId()">
+    @for (p of proyectos(); track p.id) {
+      <option [value]="p.id">{{ p.nombre }}</option>
+    }
+  </select>
+</div>
+
+<div class="grid-widgets">
+  @for (w of widgets(); track w.remote) {
+    <section class="celda-widget">
+      @if (w.componente; as c) {
+        @if (w.remote === 'mfe-projects') {
+          <ng-container *ngComponentOutlet="c; inputs: inputsProyecto()"></ng-container>
+        } @else {
+          <ng-container *ngComponentOutlet="c; inputs: inputsVacios"></ng-container>
+        }
+      } @else if (w.error; as e) {
+        <p class="fallback" role="alert">
+          {{ w.nombre }} no esta disponible ({{ w.remote }}): {{ e }}
+        </p>
+      } @else {
+        <p class="cargando">Cargando {{ w.nombre }}...</p>
+      }
+    </section>
+  }
+</div>

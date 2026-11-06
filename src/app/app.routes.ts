@@ -1,27 +1,39 @@
-﻿import { Routes } from '@angular/router';
+import { Routes } from '@angular/router';
 import { loadRemoteModule } from '@angular-architects/native-federation';
+import { Dashboard } from './dashboard/dashboard';
+
+/**
+ * Carga un remote y devuelve sus rutas; si el remote no responde, muestra el
+ * fallback en su zona de contenido y el resto de la aplicacion sigue
+ * funcionando (rulebook: degradacion elegante).
+ */
+function remoteConFallback(remote: string): Routes {
+  return [
+    {
+      loadChildren: () =>
+        loadRemoteModule(remote, './Module')
+          .then((m) => m.remoteRoutes)
+          .catch(() => fallbackRoutes(remote)),
+    },
+  ];
+}
+
+function fallbackRoutes(remote: string): Routes {
+  return [
+    {
+      path: '**',
+      loadComponent: () =>
+        import('./remote-fallback/remote-fallback').then((m) => m.RemoteFallback),
+      data: { remote },
+    },
+  ];
+}
 
 export const routes: Routes = [
-  {
-    path: 'projects',
-    loadChildren: () =>
-      loadRemoteModule('mfe-projects', './Module').then((m) => m.remoteRoutes),
-  },
-  {
-    path: 'reports',
-    loadChildren: () =>
-      loadRemoteModule('mfe-reports', './Module').then((m) => m.remoteRoutes),
-  },
-  {
-    path: 'admin',
-    loadChildren: () =>
-      loadRemoteModule('mfe-admin', './Module').then((m) => m.remoteRoutes),
-  },
-  {
-    path: 'governance',
-    loadChildren: () =>
-      loadRemoteModule('mfe-governance', './Module').then((m) => m.remoteRoutes),
-  },
-  { path: '', redirectTo: 'projects', pathMatch: 'full' },
-  { path: '**', redirectTo: 'projects' },
+  { path: '', component: Dashboard, title: 'ProjectHub' },
+  { path: 'projects', ...remoteConFallback('mfe-projects') },
+  { path: 'reports', ...remoteConFallback('mfe-reports') },
+  { path: 'admin', ...remoteConFallback('mfe-admin') },
+  { path: 'governance', ...remoteConFallback('mfe-governance') },
+  { path: '**', redirectTo: '' },
 ];

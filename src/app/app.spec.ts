@@ -1,24 +1,39 @@
 import { TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
 import { App } from './app';
 
 describe('App', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [App],
-    })
-      .compileComponents();
+      providers: [provideRouter([])],
+    }).compileComponents();
   });
 
-  it('should create the app', () => {
-    const fixture = TestBed.createComponent(App);
-    const app = fixture.componentInstance;
-    expect(app).toBeTruthy();
-  });
-
-  it('should render title', async () => {
+  it('muestra el titulo y la navegacion de primer nivel', async () => {
     const fixture = TestBed.createComponent(App);
     await fixture.whenStable();
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('h1')?.textContent).toContain('Hello, shell');
+
+    expect(compiled.querySelector('.shell-title')?.textContent).toContain('ProjectHub');
+
+    const links = Array.from(compiled.querySelectorAll('nav a')).map((a) =>
+      a.textContent?.trim(),
+    );
+    expect(links).toEqual([
+      'Proyectos',
+      'Reportes',
+      'Administracion',
+      'Gobernanza',
+    ]);
+  });
+
+  it('incluye el selector de usuario activo en el header', async () => {
+    const fixture = TestBed.createComponent(App);
+    await fixture.whenStable();
+    const compiled = fixture.nativeElement as HTMLElement;
+
+    const selector = compiled.querySelector('app-user-switcher select');
+    expect(selector).not.toBeNull();
   });
 });
