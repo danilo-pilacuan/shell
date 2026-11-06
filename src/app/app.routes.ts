@@ -33,6 +33,11 @@ function fallbackRoutes(remote: string): Routes {
 
 export const routes: Routes = [
   { path: '', component: Dashboard, title: 'ProjectHub' },
+  {
+    path: 'login',
+    loadComponent: () => import('./login/login').then((m) => m.Login),
+    title: 'Iniciar sesion - ProjectHub',
+  },
   { path: 'projects', canActivate: [sesionGuard], ...remoteConFallback('mfe-projects') },
   { path: 'reports', canActivate: [sesionGuard], ...remoteConFallback('mfe-reports') },
   {
