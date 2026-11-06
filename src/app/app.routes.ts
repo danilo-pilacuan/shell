@@ -1,6 +1,8 @@
 import { Route, Routes } from '@angular/router';
 import { loadRemoteModule } from '@angular-architects/native-federation';
 import { Dashboard } from './dashboard/dashboard';
+import { permisoGuard } from './auth/permiso.guard';
+import { sesionGuard } from './auth/sesion.guard';
 
 /**
  * Carga un remote y devuelve su configuracion de ruta; si el remote no
@@ -31,9 +33,20 @@ function fallbackRoutes(remote: string): Routes {
 
 export const routes: Routes = [
   { path: '', component: Dashboard, title: 'ProjectHub' },
-  { path: 'projects', ...remoteConFallback('mfe-projects') },
-  { path: 'reports', ...remoteConFallback('mfe-reports') },
-  { path: 'admin', ...remoteConFallback('mfe-admin') },
-  { path: 'governance', ...remoteConFallback('mfe-governance') },
+  { path: 'projects', canActivate: [sesionGuard], ...remoteConFallback('mfe-projects') },
+  { path: 'reports', canActivate: [sesionGuard], ...remoteConFallback('mfe-reports') },
+  {
+    path: 'admin',
+    canActivate: [sesionGuard, permisoGuard],
+    data: { roles: ['Admin'] },
+    ...remoteConFallback('mfe-admin'),
+  },
+  { path: 'governance', canActivate: [sesionGuard], ...remoteConFallback('mfe-governance') },
+  {
+    path: 'sin-permisos',
+    loadComponent: () =>
+      import('./sin-permisos/sin-permisos').then((m) => m.SinPermisos),
+    title: 'Sin permisos - ProjectHub',
+  },
   { path: '**', redirectTo: '' },
 ];
