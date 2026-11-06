@@ -1,9 +1,12 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { Router } from '@angular/router';
 import { ETIQUETA_ROL, sesionStore } from '@projecthub/shared';
 
 /**
  * Selector de usuario activo (1.6): sesion simulada que determina todos los
- * permisos. Solo ofrece usuarios activos (1.8).
+ * permisos. Solo ofrece usuarios activos (1.8). Al iniciar sesion, si la
+ * navegacion previa fue redirigida por sesionGuard/permisoGuard y quedo
+ * guardada en el query param `de`, reanuda esa ruta (promesa del guard 1.7).
  */
 @Component({
   selector: 'app-user-switcher',
@@ -70,6 +73,7 @@ import { ETIQUETA_ROL, sesionStore } from '@projecthub/shared';
 export class UserSwitcher {
   protected readonly sesion = sesionStore();
   protected readonly ETIQUETA_ROL = ETIQUETA_ROL;
+  private readonly router = inject(Router);
 
   protected seleccionar(event: Event): void {
     const id = (event.target as HTMLSelectElement).value;
@@ -79,8 +83,25 @@ export class UserSwitcher {
     }
     try {
       this.sesion.seleccionar(id);
+      this.irAlDestinoGuardado();
     } catch {
       // Un usuario inactivo no aparece en el selector; no deberia ocurrir.
     }
+  }
+
+  /**
+   * Reanuda la ruta guardada en el query param `de` (puesto por sesionGuard
+   * o permisoGuard). Solo URLs internas que empiezan con una sola barra;
+   * descarta protocolos externos (javascript:, http:).
+   */
+  private irAlDestinoGuardado(): void {
+    const destino = this.router.parseUrl(this.router.url).queryParams['de'];
+    if (typeof destino !== 'string' || destino.length < 2) {
+      return;
+    }
+    if (!destino.startsWith('/')) {
+      return;
+    }
+    void this.router.navigateByUrl(destino);
   }
 }

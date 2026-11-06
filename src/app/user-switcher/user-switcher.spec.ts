@@ -1,5 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { UserSwitcher } from './user-switcher';
+import { provideRouter, Router } from '@angular/router';
 
 describe('UserSwitcher', () => {
   it('ofrece solo usuarios activos de la semilla', async () => {
@@ -35,5 +36,46 @@ describe('UserSwitcher', () => {
 
     const texto = fixture.nativeElement.textContent ?? '';
     expect(texto).toContain('Project Manager');
+  });
+
+  it('navega al destino guardado en ?de= al iniciar sesion', async () => {
+    await TestBed.configureTestingModule({
+      imports: [UserSwitcher],
+      providers: [
+        provideRouter([
+          { path: 'reports', loadComponent: () => Promise.resolve(UserSwitcher) },
+        ]),
+      ],
+    }).compileComponents();
+
+    const router = TestBed.inject(Router);
+    await router.navigate(['/'], { queryParams: { de: '/reports' } });
+
+    const fixture = TestBed.createComponent(UserSwitcher);
+    await fixture.whenStable();
+
+    const select = fixture.nativeElement.querySelector('select') as HTMLSelectElement;
+    select.value = 'u-admin';
+    select.dispatchEvent(new Event('change'));
+    await fixture.whenStable();
+
+    expect(TestBed.inject(Router).url).toBe('/reports');
+  });
+
+  it('no navega si no hay destino guardado', async () => {
+    await TestBed.configureTestingModule({
+      imports: [UserSwitcher],
+      providers: [provideRouter([])],
+    }).compileComponents();
+
+    const fixture = TestBed.createComponent(UserSwitcher);
+    await fixture.whenStable();
+
+    const select = fixture.nativeElement.querySelector('select') as HTMLSelectElement;
+    select.value = 'u-admin';
+    select.dispatchEvent(new Event('change'));
+    await fixture.whenStable();
+
+    expect(TestBed.inject(Router).url).toBe('/');
   });
 });
