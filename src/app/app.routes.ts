@@ -38,6 +38,12 @@ export const routes: Routes = [
     loadComponent: () => import('./login/login').then((m) => m.Login),
     title: 'Iniciar sesion - ProjectHub',
   },
+  {
+    path: 'perfil',
+    canActivate: [sesionGuard],
+    loadComponent: () => import('./perfil/perfil').then((m) => m.Perfil),
+    title: 'Mi perfil - ProjectHub',
+  },
   { path: 'projects', canActivate: [sesionGuard], ...remoteConFallback('mfe-projects') },
   { path: 'reports', canActivate: [sesionGuard], ...remoteConFallback('mfe-reports') },
   {

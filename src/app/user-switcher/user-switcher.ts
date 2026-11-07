@@ -26,6 +26,9 @@ import { AutenticacionService, ETIQUETA_ROL, sesionStore } from '@projecthub/sha
             }
           </span>
         }
+        <button type="button" (click)="irAPerfil()" aria-label="Cambiar contrasena">
+          Cambiar contrasena
+        </button>
         <button type="button" (click)="cerrarSesion()" aria-label="Cerrar sesion">
           Cerrar sesion
         </button>
@@ -117,6 +120,11 @@ export class UserSwitcher {
   protected cerrarSesion(): void {
     this.auth.cerrarSesion();
     void this.router.navigateByUrl('/login');
+  }
+
+  /** Cambio de contrasena propia (14.5) en la pantalla de perfil. */
+  protected irAPerfil(): void {
+    void this.router.navigateByUrl('/perfil');
   }
 
   protected seleccionar(event: Event): void {
