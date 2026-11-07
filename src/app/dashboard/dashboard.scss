@@ -4,18 +4,12 @@ h2 {
 }
 
 .selector-proyecto {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
   margin-bottom: 1rem;
   font-size: 0.875rem;
 
-  select {
-    padding: 0.35rem 0.5rem;
-    border: 1px solid var(--ph-borde, #d5dae2);
-    border-radius: var(--ph-radio, 8px);
-    background: var(--ph-superficie, #fff);
-    color: var(--ph-texto, #1c2430);
+  .campo {
+    width: 22rem;
+    max-width: 100%;
   }
 }
 

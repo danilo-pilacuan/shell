@@ -1,5 +1,9 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
+import { MatButton } from '@angular/material/button';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
 import { AutenticacionService, ETIQUETA_ROL, sesionStore } from '@projecthub/shared';
 
 /**
@@ -15,6 +19,7 @@ import { AutenticacionService, ETIQUETA_ROL, sesionStore } from '@projecthub/sha
 @Component({
   selector: 'app-user-switcher',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [MatButton, MatFormFieldModule, MatInputModule, MatSelectModule],
   template: `
     @if (auth.sesionReal()) {
       <div class="user-switcher real">
@@ -26,28 +31,28 @@ import { AutenticacionService, ETIQUETA_ROL, sesionStore } from '@projecthub/sha
             }
           </span>
         }
-        <button type="button" (click)="irAPerfil()" aria-label="Cambiar contrasena">
+        <button type="button" mat-button class="boton" (click)="irAPerfil()" aria-label="Cambiar contrasena">
           Cambiar contrasena
         </button>
-        <button type="button" (click)="cerrarSesion()" aria-label="Cerrar sesion">
+        <button type="button" mat-button class="boton" (click)="cerrarSesion()" aria-label="Cerrar sesion">
           Cerrar sesion
         </button>
       </div>
     } @else {
-      <label class="user-switcher">
+      <div class="user-switcher demo">
         <span class="etiqueta">Sesion</span>
-        <select
-          [value]="sesion.usuarioActivo()?.id ?? ''"
-          (change)="seleccionar($event)"
-          aria-label="Usuario activo"
-        >
-          <option value="" disabled [selected]="!sesion.haySesion()">Sin sesion</option>
-          @for (u of sesion.usuariosActivos(); track u.id) {
-            <option [value]="u.id" [selected]="sesion.usuarioActivo()?.id === u.id">
-              {{ u.nombre }}
-            </option>
-          }
-        </select>
+        <mat-form-field appearance="outline" subscriptSizing="dynamic" class="campo">
+          <mat-label>Usuario activo</mat-label>
+          <mat-select
+            [value]="sesion.usuarioActivo()?.id ?? ''"
+            (selectionChange)="seleccionar($any($event).value)"
+          >
+            <mat-option value="" [disabled]="true">Sin sesion</mat-option>
+            @for (u of sesion.usuariosActivos(); track u.id) {
+              <mat-option [value]="u.id">{{ u.nombre }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
         @if (sesion.usuarioActivo(); as actor) {
           <span class="roles">
             @for (rol of actor.roles; track rol) {
@@ -55,7 +60,7 @@ import { AutenticacionService, ETIQUETA_ROL, sesionStore } from '@projecthub/sha
             }
           </span>
         }
-      </label>
+      </div>
     }
   `,
   styles: [
@@ -72,12 +77,10 @@ import { AutenticacionService, ETIQUETA_ROL, sesionStore } from '@projecthub/sha
         letter-spacing: 0.03em;
         font-size: 0.6875rem;
       }
-      select {
-        padding: 0.3rem 0.45rem;
-        border: 1px solid var(--ph-borde, #d5dae2);
-        border-radius: var(--ph-radio, 8px);
-        background: var(--ph-superficie, #fff);
-        color: var(--ph-texto, #1c2430);
+      .campo {
+        width: 13rem;
+        font-size: 0.8125rem;
+        --mdc-outlined-text-field-container-color: var(--ph-superficie, #fff);
       }
       .roles {
         display: flex;
@@ -86,7 +89,10 @@ import { AutenticacionService, ETIQUETA_ROL, sesionStore } from '@projecthub/sha
       .nombre {
         font-weight: 600;
       }
-      button {
+      .boton {
+        --mat-button-filled-container-color: var(--ph-primario, #1f5eff);
+        --mat-button-filled-label-text-color: #fff;
+
         padding: 0.3rem 0.55rem;
         border: 1px solid var(--ph-borde, #d5dae2);
         border-radius: var(--ph-radio, 8px);
@@ -96,7 +102,7 @@ import { AutenticacionService, ETIQUETA_ROL, sesionStore } from '@projecthub/sha
         font-size: 0.75rem;
         cursor: pointer;
       }
-      button:hover {
+      .boton:hover {
         border-color: var(--ph-primario, #1c5fd6);
         color: var(--ph-primario, #1c5fd6);
       }
@@ -127,8 +133,7 @@ export class UserSwitcher {
     void this.router.navigateByUrl('/perfil');
   }
 
-  protected seleccionar(event: Event): void {
-    const id = (event.target as HTMLSelectElement).value;
+  seleccionar(id: string): void {
     if (!id) {
       this.sesion.cerrar();
       return;

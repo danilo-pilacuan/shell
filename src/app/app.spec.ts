@@ -41,7 +41,7 @@ describe('App', () => {
     await fixture.whenStable();
     const compiled = fixture.nativeElement as HTMLElement;
 
-    const selector = compiled.querySelector('app-user-switcher select');
+    const selector = compiled.querySelector('app-user-switcher mat-select');
     expect(selector).not.toBeNull();
   });
 });

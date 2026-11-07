@@ -1,12 +1,14 @@
 <h2>Dashboard</h2>
 
 <div class="selector-proyecto">
-  <label for="proyecto-dashboard">Proyecto</label>
-  <select id="proyecto-dashboard" (change)="cambiarProyecto($event)" [value]="proyectoId()">
-    @for (p of proyectos(); track p.id) {
-      <option [value]="p.id">{{ p.nombre }}</option>
-    }
-  </select>
+  <mat-form-field appearance="outline" subscriptSizing="dynamic" class="campo">
+    <mat-label>Proyecto</mat-label>
+    <mat-select [value]="proyectoId()" (selectionChange)="cambiarProyecto($any($event).value)">
+      @for (p of proyectos(); track p.id) {
+        <mat-option [value]="p.id">{{ p.nombre }}</mat-option>
+      }
+    </mat-select>
+  </mat-form-field>
 </div>
 
 <div class="grid-widgets">

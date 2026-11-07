@@ -1,6 +1,9 @@
 import { ChangeDetectionStrategy, Component, Type, computed, inject, signal } from '@angular/core';
 import { NgComponentOutlet } from '@angular/common';
 import { loadRemoteModule } from '@angular-architects/native-federation';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
 import { IntlFormat } from '@projecthub/ui';
 import { ProjectStore, sesionStore } from '@projecthub/shared';
 
@@ -19,7 +22,7 @@ interface WidgetCargado {
 @Component({
   selector: 'app-dashboard',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [NgComponentOutlet],
+  imports: [NgComponentOutlet, MatFormFieldModule, MatInputModule, MatSelectModule],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.scss',
 })
@@ -48,8 +51,8 @@ export class Dashboard {
     this.cargarWidget('mfe-governance', './Widget', 'GateStatusWidget', 2);
   }
 
-  protected cambiarProyecto(event: Event): void {
-    this.proyectoId.set((event.target as HTMLSelectElement).value);
+  protected cambiarProyecto(id: string): void {
+    this.proyectoId.set(id);
   }
 
   private cargarWidget(

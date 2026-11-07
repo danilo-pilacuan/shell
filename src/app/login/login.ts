@@ -1,5 +1,8 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { MatButton } from '@angular/material/button';
+import { MatInputModule } from '@angular/material/input';
+import { FormField } from '@projecthub/ui';
 import { AutenticacionService, ErrorAutenticacion } from '@projecthub/shared';
 
 /**
@@ -13,14 +16,15 @@ import { AutenticacionService, ErrorAutenticacion } from '@projecthub/shared';
 @Component({
   selector: 'app-login',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [MatButton, MatInputModule, FormField],
   template: `
     <section class="login">
       <h1>Iniciar sesion</h1>
       <p class="ayuda">Accede con tu correo de ProjectHub.</p>
       <form (submit)="entrar($event)">
-        <label>
-          <span>Correo</span>
+        <ph-form-field label="Correo" [requerido]="true">
           <input
+            matInput
             type="email"
             name="correo"
             autocomplete="username"
@@ -28,10 +32,10 @@ import { AutenticacionService, ErrorAutenticacion } from '@projecthub/shared';
             [value]="correo()"
             (input)="correo.set($any($event.target).value)"
           />
-        </label>
-        <label>
-          <span>Contrasena</span>
+        </ph-form-field>
+        <ph-form-field label="Contrasena" [requerido]="true">
           <input
+            matInput
             type="password"
             name="contrasena"
             autocomplete="current-password"
@@ -39,11 +43,11 @@ import { AutenticacionService, ErrorAutenticacion } from '@projecthub/shared';
             [value]="contrasena()"
             (input)="contrasena.set($any($event.target).value)"
           />
-        </label>
+        </ph-form-field>
         @if (error(); as mensaje) {
           <p class="error" role="alert">{{ mensaje }}</p>
         }
-        <button type="submit" [disabled]="ocupado()">
+        <button type="submit" mat-flat-button class="boton" [disabled]="ocupado()">
           {{ ocupado() ? 'Verificando...' : 'Entrar' }}
         </button>
       </form>
@@ -73,33 +77,21 @@ import { AutenticacionService, ErrorAutenticacion } from '@projecthub/shared';
         flex-direction: column;
         gap: 0.75rem;
       }
-      label {
-        display: flex;
-        flex-direction: column;
-        gap: 0.25rem;
-        font-size: 0.8125rem;
-      }
-      input {
-        padding: 0.45rem 0.6rem;
-        border: 1px solid var(--ph-borde, #d5dae2);
-        border-radius: var(--ph-radio, 8px);
-        font: inherit;
-      }
       .error {
         margin: 0;
         color: var(--ph-error, #b3261e);
         font-size: 0.8125rem;
       }
-      button {
+      .boton {
+        --mat-button-filled-container-color: var(--ph-primario, #1c5fd6);
+        --mat-button-filled-label-text-color: #fff;
+
+        align-self: flex-start;
         padding: 0.5rem 0.75rem;
-        border: none;
         border-radius: var(--ph-radio, 8px);
-        background: var(--ph-primario, #1c5fd6);
-        color: #fff;
         font: inherit;
-        cursor: pointer;
       }
-      button:disabled {
+      .boton:disabled {
         opacity: 0.6;
         cursor: default;
       }

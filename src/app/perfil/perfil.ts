@@ -1,6 +1,13 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { AutenticacionService, ErrorAutenticacion, sesionStore } from '@projecthub/shared';
+import { MatButton } from '@angular/material/button';
+import { MatInputModule } from '@angular/material/input';
+import { FormField } from '@projecthub/ui';
+import {
+  AutenticacionService,
+  ErrorAutenticacion,
+  sesionStore,
+} from '@projecthub/shared';
 
 /**
  * Perfil del usuario con sesion real (docs/funcionalidades.md 14.5).
@@ -11,7 +18,7 @@ import { AutenticacionService, ErrorAutenticacion, sesionStore } from '@projecth
  */
 @Component({
   selector: 'app-perfil',
-  imports: [RouterLink],
+  imports: [RouterLink, MatButton, MatInputModule, FormField],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <section class="perfil">
@@ -20,9 +27,9 @@ import { AutenticacionService, ErrorAutenticacion, sesionStore } from '@projecth
         Sesion de {{ actor()?.nombre ?? 'usuario' }} ({{ actor()?.correo }})
       </p>
       <form (submit)="guardar($event)">
-        <label>
-          <span>Contrasena actual</span>
+        <ph-form-field label="Contrasena actual" [requerido]="true">
           <input
+            matInput
             type="password"
             name="actual"
             autocomplete="current-password"
@@ -30,10 +37,10 @@ import { AutenticacionService, ErrorAutenticacion, sesionStore } from '@projecth
             [value]="actual()"
             (input)="actual.set($any($event.target).value)"
           />
-        </label>
-        <label>
-          <span>Contrasena nueva (minimo 8 caracteres)</span>
+        </ph-form-field>
+        <ph-form-field label="Contrasena nueva (minimo 8 caracteres)" [requerido]="true">
           <input
+            matInput
             type="password"
             name="nueva"
             autocomplete="new-password"
@@ -42,10 +49,10 @@ import { AutenticacionService, ErrorAutenticacion, sesionStore } from '@projecth
             [value]="nueva()"
             (input)="nueva.set($any($event.target).value)"
           />
-        </label>
-        <label>
-          <span>Confirmar contrasena nueva</span>
+        </ph-form-field>
+        <ph-form-field label="Confirmar contrasena nueva" [requerido]="true">
           <input
+            matInput
             type="password"
             name="confirmacion"
             autocomplete="new-password"
@@ -53,7 +60,7 @@ import { AutenticacionService, ErrorAutenticacion, sesionStore } from '@projecth
             [value]="confirmacion()"
             (input)="confirmacion.set($any($event.target).value)"
           />
-        </label>
+        </ph-form-field>
         @if (error(); as mensaje) {
           <p class="error" role="alert">{{ mensaje }}</p>
         }
@@ -62,7 +69,7 @@ import { AutenticacionService, ErrorAutenticacion, sesionStore } from '@projecth
         }
         <div class="acciones">
           <a routerLink="/">Volver</a>
-          <button type="submit" [disabled]="ocupado()">
+          <button type="submit" mat-flat-button class="boton" [disabled]="ocupado()">
             {{ ocupado() ? 'Guardando...' : 'Cambiar contrasena' }}
           </button>
         </div>
@@ -93,20 +100,6 @@ import { AutenticacionService, ErrorAutenticacion, sesionStore } from '@projecth
         flex-direction: column;
         gap: 0.75rem;
       }
-      label {
-        display: flex;
-        flex-direction: column;
-        gap: 0.25rem;
-        font-size: 0.8125rem;
-      }
-      input {
-        padding: 0.45rem 0.6rem;
-        border: 1px solid var(--ph-borde, #d5dae2);
-        border-radius: var(--ph-radio, 8px);
-        font: inherit;
-        background: var(--ph-superficie, #fff);
-        color: var(--ph-texto, #1c2430);
-      }
       .error {
         margin: 0;
         color: var(--ph-error, #b3261e);
@@ -126,16 +119,15 @@ import { AutenticacionService, ErrorAutenticacion, sesionStore } from '@projecth
         color: var(--ph-texto-suave, #5b6472);
         font-size: 0.8125rem;
       }
-      button {
+      .boton {
+        --mat-button-filled-container-color: var(--ph-primario, #1c5fd6);
+        --mat-button-filled-label-text-color: #fff;
+
         padding: 0.5rem 0.75rem;
-        border: none;
         border-radius: var(--ph-radio, 8px);
-        background: var(--ph-primario, #1c5fd6);
-        color: #fff;
         font: inherit;
-        cursor: pointer;
       }
-      button:disabled {
+      .boton:disabled {
         opacity: 0.6;
         cursor: default;
       }
