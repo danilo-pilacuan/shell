@@ -116,4 +116,26 @@ describe('App', () => {
     expect(router.url).toBe('/login?expirada=1');
     expect(TestBed.inject(TokenAlmacen).leer()).toBeNull();
   });
+
+  it('redirige a /login?desactivada=1 cuando la cuenta fue desactivada en pleno uso (14.7)', async () => {
+    TestBed.inject(TokenAlmacen).guardar('jwt-vigente');
+    const router = TestBed.inject(Router);
+    await router.navigateByUrl('/projects');
+    const fixture = TestBed.createComponent(App);
+    await fixture.whenStable();
+
+    const enlace = TestBed.inject(ApiEnlaceService);
+    const promesa = enlace.lista('/api/usuarios');
+    TestBed.inject(HttpTestingController)
+      .expectOne('http://localhost:8100/api/usuarios')
+      .flush(
+        { detail: { codigo: 'USUARIO_INACTIVO', mensaje: 'Tu cuenta fue desactivada.' } },
+        { status: 403, statusText: 'Forbidden' },
+      );
+    await promesa;
+    await fixture.whenStable();
+
+    expect(router.url).toBe('/login?desactivada=1');
+    expect(TestBed.inject(TokenAlmacen).leer()).toBeNull();
+  });
 });

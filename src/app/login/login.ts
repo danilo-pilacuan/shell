@@ -47,6 +47,9 @@ import { AutenticacionService, ErrorAutenticacion } from '@projecthub/shared';
         @if (avisoExpirada()) {
           <p class="error" role="alert">Tu sesion ha expirado; inicia sesion de nuevo.</p>
         }
+        @if (avisoDesactivada()) {
+          <p class="error" role="alert">Tu cuenta fue desactivada; contacta a un administrador.</p>
+        }
         @if (error(); as mensaje) {
           <p class="error" role="alert">{{ mensaje }}</p>
         }
@@ -110,6 +113,11 @@ export class Login {
   /** Aviso 14.6: el backend invalido la sesion en pleno uso (?expirada=1). */
   protected readonly avisoExpirada = signal(
     inject(ActivatedRoute).snapshot.queryParamMap.get('expirada') === '1',
+  );
+
+  /** Aviso 14.7: el actor fue desactivado con sesion activa (?desactivada=1). */
+  protected readonly avisoDesactivada = signal(
+    inject(ActivatedRoute).snapshot.queryParamMap.get('desactivada') === '1',
   );
 
   private readonly autenticacion = inject(AutenticacionService);

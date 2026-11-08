@@ -139,3 +139,35 @@ describe('Login tras sesion expirada (?expirada=1)', () => {
     expect(el.querySelector('.error')?.textContent).toContain('Tu sesion ha expirado');
   });
 });
+
+describe('Login tras cuenta desactivada (?desactivada=1)', () => {
+  let fixture: ReturnType<typeof TestBed.createComponent<Login>>;
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [Login],
+      providers: [
+        provideRouter([]),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        {
+          provide: ActivatedRoute,
+          useValue: { snapshot: { queryParamMap: { get: (k: string) => (k === 'desactivada' ? '1' : null) } } },
+        },
+      ],
+    }).compileComponents();
+    TestBed.inject(TokenAlmacen).limpiar();
+    fixture = TestBed.createComponent(Login);
+  });
+
+  afterEach(() => {
+    TestBed.inject(TokenAlmacen).limpiar();
+    TestBed.inject(HttpTestingController).verify();
+  });
+
+  it('muestra el aviso de cuenta desactivada', () => {
+    fixture.detectChanges();
+    const el = fixture.nativeElement as HTMLElement;
+    expect(el.querySelector('.error')?.textContent).toContain('Tu cuenta fue desactivada');
+  });
+});

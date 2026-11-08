@@ -42,16 +42,25 @@ export class App {
   /**
    * Sesion expirada en pleno uso (14.6): el token ya fue limpiado por
    * ApiEnlaceService; aqui se cierra la sesion y se lleva al usuario a
-   * /login con el aviso. Un solo aviso por expiracion.
+   * /login con el aviso. Cuenta desactivada (14.7): mismo cierre, aviso
+   * propio. Un solo aviso por evento.
    */
   constructor() {
     let expiracionesProcesadas = 0;
+    let desactivacionesProcesadas = 0;
     effect(() => {
       const total = this.autenticacion.expiraciones();
       while (expiracionesProcesadas < total) {
         expiracionesProcesadas++;
         if (!this.rutaActual().startsWith('/login')) {
           void this.router.navigateByUrl('/login?expirada=1', { replaceUrl: true });
+        }
+      }
+      const totalDesactivaciones = this.autenticacion.desactivaciones();
+      while (desactivacionesProcesadas < totalDesactivaciones) {
+        desactivacionesProcesadas++;
+        if (!this.rutaActual().startsWith('/login')) {
+          void this.router.navigateByUrl('/login?desactivada=1', { replaceUrl: true });
         }
       }
     });
