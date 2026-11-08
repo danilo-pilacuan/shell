@@ -1,10 +1,13 @@
 import { TestBed } from '@angular/core/testing';
+import { REMOTE_MODULE_LOADER, type RemoteModuleLoader } from '@projecthub/shared';
 import { Dashboard } from './dashboard';
 
 describe('Dashboard', () => {
   it('muestra las tres celdas de widgets federados', async () => {
+    const loaderStub: RemoteModuleLoader = () => new Promise(() => undefined);
     await TestBed.configureTestingModule({
       imports: [Dashboard],
+      providers: [{ provide: REMOTE_MODULE_LOADER, useValue: loaderStub }],
     }).compileComponents();
 
     const fixture = TestBed.createComponent(Dashboard);

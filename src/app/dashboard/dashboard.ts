@@ -1,11 +1,10 @@
 import { ChangeDetectionStrategy, Component, Type, computed, inject, signal } from '@angular/core';
 import { NgComponentOutlet } from '@angular/common';
-import { loadRemoteModule } from '@angular-architects/native-federation';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { IntlFormat } from '@projecthub/ui';
-import { ProjectStore, sesionStore } from '@projecthub/shared';
+import { ProjectStore, remoteModuleLoader, sesionStore } from '@projecthub/shared';
 
 interface WidgetCargado {
   nombre: string;
@@ -28,6 +27,7 @@ interface WidgetCargado {
 })
 export class Dashboard {
   private readonly store = inject(ProjectStore);
+  private readonly cargarRemoto = remoteModuleLoader();
   protected readonly intl = inject(IntlFormat);
 
   protected readonly widgets = signal<WidgetCargado[]>([
@@ -61,11 +61,14 @@ export class Dashboard {
     exportName: string,
     indice: number,
   ): void {
-    loadRemoteModule(remote, exposedModule)
-      .then((m: Record<string, Type<unknown>>) => {
+    this.cargarRemoto(remote, exposedModule)
+      .then((m) => {
+        const exportado = m[exportName];
+        const componente =
+          typeof exportado === 'function' ? (exportado as Type<unknown>) : null;
         this.widgets.update((lista) =>
           lista.map((w, i) =>
-            i === indice ? { ...w, componente: m[exportName] ?? null } : w,
+            i === indice ? { ...w, componente } : w,
           ),
         );
       })
