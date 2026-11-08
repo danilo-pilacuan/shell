@@ -10,14 +10,34 @@ import { sesionGuard } from './auth/sesion.guard';
  * aplicacion sigue funcionando (rulebook: degradacion elegante).
  * Devuelve un objeto Route (no un arreglo): el punto de uso lo expande
  * dentro de la ruta con path propio.
+ *
+ * `cargar` es inyectable para poder probar el camino de fallo en unit tests
+ * sin depender de la federacion real.
  */
-function remoteConFallback(remote: string): Route {
+export function cargaRemote(
+  remote: string,
+  cargar: (remote: string, exposed: string) => Promise<unknown> = loadRemoteModule,
+): Route {
   return {
     loadChildren: () =>
-      loadRemoteModule(remote, './Module')
-        .then((m) => m.remoteRoutes)
-        .catch(() => fallbackRoutes(remote)),
+      cargar(remote, './Module')
+        .then((m) => (m as { remoteRoutes: Routes }).remoteRoutes)
+        .catch((error: unknown) => {
+          // El fallback es silencioso por diseno (degradacion elegante), pero
+          // sin este registro la causa real del fallo queda oculta (p. ej. un
+          // dev server sirviendo un build desactualizado); el error debe
+          // persistir en consola para poder diagnosticar.
+          console.warn(
+            `[federacion] No se pudo cargar '${remote}' ('./Module'); se muestra el fallback.`,
+            error,
+          );
+          return fallbackRoutes(remote);
+        }),
   };
+}
+
+function remoteConFallback(remote: string): Route {
+  return cargaRemote(remote);
 }
 
 function fallbackRoutes(remote: string): Routes {
