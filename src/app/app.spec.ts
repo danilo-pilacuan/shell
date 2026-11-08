@@ -1,15 +1,30 @@
+import { Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
-import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { provideRouter } from '@angular/router';
+import {
+  HttpTestingController,
+  provideHttpClientTesting,
+} from '@angular/common/http/testing';
+import { provideRouter, Router } from '@angular/router';
 import { ApiEnlaceService, TokenAlmacen } from '@projecthub/shared';
 import { App } from './app';
+
+/** Ruta stub para navegaciones del router en tests. */
+@Component({ selector: 'app-dummy', template: '' })
+class DummyRoute {}
 
 describe('App', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [App],
-      providers: [provideRouter([]), provideHttpClient(), provideHttpClientTesting()],
+      providers: [
+        provideRouter([
+          { path: 'projects', component: DummyRoute },
+          { path: 'login', component: DummyRoute },
+        ]),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+      ],
     }).compileComponents();
     TestBed.inject(TokenAlmacen).limpiar();
   });
@@ -78,5 +93,27 @@ describe('App', () => {
     enlace.marcar(true);
     await fixture.whenStable();
     expect(fixture.nativeElement.querySelector('.shell-banner-api')).toBeNull();
+  });
+
+  it('redirige a /login?expirada=1 cuando el backend invalida la sesion (14.6)', async () => {
+    TestBed.inject(TokenAlmacen).guardar('jwt-vigente');
+    const router = TestBed.inject(Router);
+    await router.navigateByUrl('/projects');
+    const fixture = TestBed.createComponent(App);
+    await fixture.whenStable();
+
+    const enlace = TestBed.inject(ApiEnlaceService);
+    const promesa = enlace.lista('/api/usuarios');
+    TestBed.inject(HttpTestingController)
+      .expectOne('http://localhost:8100/api/usuarios')
+      .flush(
+        { detail: { codigo: 'SESION_INVALIDA', mensaje: 'Tu sesion ha expirado.' } },
+        { status: 401, statusText: 'Unauthorized' },
+      );
+    await promesa;
+    await fixture.whenStable();
+
+    expect(router.url).toBe('/login?expirada=1');
+    expect(TestBed.inject(TokenAlmacen).leer()).toBeNull();
   });
 });

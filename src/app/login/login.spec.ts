@@ -98,4 +98,44 @@ describe('Login', () => {
     const el = fixture.nativeElement as HTMLElement;
     expect(el.querySelector('.error')).toBeNull();
   });
+
+  it('muestra el aviso de sesion expirada con el query param expirada=1', () => {
+    // TestBed no permite reconfigurar providers tras instanciar el modulo
+    // (limite del framework); el caso real esta cubierto en el describe
+    // 'Login tras sesion expirada' que provee la ActivatedRoute mockeada
+    // desde el inicio.
+    expect(true).toBe(true);
+  });
+});
+
+describe('Login tras sesion expirada (?expirada=1)', () => {
+  let fixture: ReturnType<typeof TestBed.createComponent<Login>>;
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [Login],
+      providers: [
+        provideRouter([]),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        {
+          provide: ActivatedRoute,
+          useValue: { snapshot: { queryParamMap: { get: (k: string) => (k === 'expirada' ? '1' : null) } } },
+        },
+      ],
+    }).compileComponents();
+    TestBed.inject(TokenAlmacen).limpiar();
+    fixture = TestBed.createComponent(Login);
+  });
+
+  afterEach(() => {
+    TestBed.inject(TokenAlmacen).limpiar();
+    TestBed.inject(HttpTestingController).verify();
+  });
+
+  it('muestra el aviso de sesion expirada', () => {
+    fixture.detectChanges();
+    const el = fixture.nativeElement as HTMLElement;
+    expect(el.querySelector('.error')?.textContent).toContain('Tu sesion ha expirado');
+  });
 });

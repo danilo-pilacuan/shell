@@ -44,6 +44,9 @@ import { AutenticacionService, ErrorAutenticacion } from '@projecthub/shared';
             (input)="contrasena.set($any($event.target).value)"
           />
         </ph-form-field>
+        @if (avisoExpirada()) {
+          <p class="error" role="alert">Tu sesion ha expirado; inicia sesion de nuevo.</p>
+        }
         @if (error(); as mensaje) {
           <p class="error" role="alert">{{ mensaje }}</p>
         }
@@ -103,6 +106,11 @@ export class Login {
   protected readonly contrasena = signal('');
   protected readonly error = signal<string | null>(null);
   protected readonly ocupado = signal(false);
+
+  /** Aviso 14.6: el backend invalido la sesion en pleno uso (?expirada=1). */
+  protected readonly avisoExpirada = signal(
+    inject(ActivatedRoute).snapshot.queryParamMap.get('expirada') === '1',
+  );
 
   private readonly autenticacion = inject(AutenticacionService);
   private readonly router = inject(Router);

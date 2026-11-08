@@ -1,6 +1,8 @@
-﻿import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
-import { RouterLink, RouterOutlet } from '@angular/router';
-import { ApiEnlaceService } from '@projecthub/shared';
+﻿import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
+import { NavigationEnd, Router, RouterLink, RouterOutlet } from '@angular/router';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { filter, map, startWith } from 'rxjs';
+import { ApiEnlaceService, AutenticacionService } from '@projecthub/shared';
 import { PermissionBanner } from '@projecthub/ui';
 import { UserSwitcher } from './user-switcher/user-switcher';
 
@@ -13,6 +15,8 @@ import { UserSwitcher } from './user-switcher/user-switcher';
 })
 export class App {
   private readonly enlace = inject(ApiEnlaceService);
+  private readonly autenticacion = inject(AutenticacionService);
+  private readonly router = inject(Router);
 
   protected readonly title = signal('ProjectHub');
   protected readonly navLinks = [
@@ -24,4 +28,32 @@ export class App {
 
   /** Banner de degradacion (iteracion 32): visible solo sin backend. */
   protected readonly sinBackend = computed(() => this.enlace.estado() === 'indisponible');
+
+  /** Ruta actual (para no redirigir si ya estamos en /login). */
+  private readonly rutaActual = toSignal(
+    this.router.events.pipe(
+      filter((e): e is NavigationEnd => e instanceof NavigationEnd),
+      map((e) => e.urlAfterRedirects),
+      startWith(this.router.url),
+    ),
+    { initialValue: this.router.url },
+  );
+
+  /**
+   * Sesion expirada en pleno uso (14.6): el token ya fue limpiado por
+   * ApiEnlaceService; aqui se cierra la sesion y se lleva al usuario a
+   * /login con el aviso. Un solo aviso por expiracion.
+   */
+  constructor() {
+    let expiracionesProcesadas = 0;
+    effect(() => {
+      const total = this.autenticacion.expiraciones();
+      while (expiracionesProcesadas < total) {
+        expiracionesProcesadas++;
+        if (!this.rutaActual().startsWith('/login')) {
+          void this.router.navigateByUrl('/login?expirada=1', { replaceUrl: true });
+        }
+      }
+    });
+  }
 }
