@@ -26,7 +26,7 @@ import { AutenticacionService, ETIQUETA_ROL, sesionStore } from '@projecthub/sha
         @if (sesion.usuarioActivo(); as actor) {
           <span class="nombre">{{ actor.nombre }}</span>
           <span class="roles">
-            @for (rol of actor.roles; track rol) {
+            @for (rol of actor.roles; track $index) {
               <span class="rol">{{ ETIQUETA_ROL[rol] }}</span>
             }
           </span>
@@ -55,7 +55,7 @@ import { AutenticacionService, ETIQUETA_ROL, sesionStore } from '@projecthub/sha
         </mat-form-field>
         @if (sesion.usuarioActivo(); as actor) {
           <span class="roles">
-            @for (rol of actor.roles; track rol) {
+            @for (rol of actor.roles; track $index) {
               <span class="rol">{{ ETIQUETA_ROL[rol] }}</span>
             }
           </span>
