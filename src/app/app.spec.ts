@@ -6,7 +6,7 @@ import {
   provideHttpClientTesting,
 } from '@angular/common/http/testing';
 import { provideRouter, Router } from '@angular/router';
-import { ApiEnlaceService, TokenAlmacen } from '@projecthub/shared';
+import { ApiEnlaceService, TokenAlmacen, urlApiPorDefecto } from '@projecthub/shared';
 import { App } from './app';
 
 /** Ruta stub para navegaciones del router en tests. */
@@ -56,7 +56,7 @@ describe('App', () => {
     await fixture.whenStable();
     const compiled = fixture.nativeElement as HTMLElement;
 
-    const selector = compiled.querySelector('app-user-switcher mat-select');
+    const selector = compiled.querySelector('app-sesion-usuario mat-select');
     expect(selector).toBeNull();
     expect(compiled.textContent).not.toContain('Usuario activo');
   });
@@ -106,7 +106,7 @@ describe('App', () => {
     const enlace = TestBed.inject(ApiEnlaceService);
     const promesa = enlace.lista('/api/usuarios');
     TestBed.inject(HttpTestingController)
-      .expectOne('http://localhost:8100/api/usuarios')
+      .expectOne(urlApiPorDefecto('/api/usuarios'))
       .flush(
         { detail: { codigo: 'SESION_INVALIDA', mensaje: 'Tu sesion ha expirado.' } },
         { status: 401, statusText: 'Unauthorized' },
@@ -128,7 +128,7 @@ describe('App', () => {
     const enlace = TestBed.inject(ApiEnlaceService);
     const promesa = enlace.lista('/api/usuarios');
     TestBed.inject(HttpTestingController)
-      .expectOne('http://localhost:8100/api/usuarios')
+      .expectOne(urlApiPorDefecto('/api/usuarios'))
       .flush(
         { detail: { codigo: 'USUARIO_INACTIVO', mensaje: 'Tu cuenta fue desactivada.' } },
         { status: 403, statusText: 'Forbidden' },

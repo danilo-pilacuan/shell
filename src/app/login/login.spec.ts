@@ -8,10 +8,10 @@ import {
 } from '@angular/common/http/testing';
 import { ActivatedRoute, provideRouter } from '@angular/router';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { TokenAlmacen } from '@projecthub/shared';
+import { TokenAlmacen, urlApiPorDefecto } from '@projecthub/shared';
 import { Login } from './login';
 
-const LOGIN_URL = 'http://localhost:8100/api/auth/login';
+const LOGIN_URL = urlApiPorDefecto('/api/auth/login');
 
 /** Colecciones que sincronizarStores descarga tras fijar la sesion (13.3). */
 const COLECCIONES_SYNC = ['usuarios', 'proyectos', 'etapas', 'entregables', 'bitacora'];
@@ -25,7 +25,7 @@ async function responderSincronizacion(httpMock: HttpTestingController): Promise
   await new Promise((resolver) => setTimeout(resolver, 0));
   for (const coleccion of COLECCIONES_SYNC) {
     httpMock
-      .match(`http://localhost:8100/api/${coleccion}`)
+      .match(urlApiPorDefecto(`/api/${coleccion}`))
       .forEach((req: TestRequest) => req.flush([]));
   }
 }

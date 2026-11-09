@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter, Router } from '@angular/router';
 import { SESION_STORE, Usuario } from '@projecthub/shared';
-import { UserSwitcher } from './user-switcher';
+import { SesionUsuario } from './sesion-usuario';
 
 /** Usuario autenticado de los tests (equivale a un login exitoso). */
 const DIANA: Usuario = {
@@ -15,10 +15,10 @@ const DIANA: Usuario = {
 
 async function montar() {
   await TestBed.configureTestingModule({
-    imports: [UserSwitcher],
+    imports: [SesionUsuario],
     providers: [provideRouter([{ path: 'login', component: PaginaLogin }])],
   }).compileComponents();
-  const fixture = TestBed.createComponent(UserSwitcher);
+  const fixture = TestBed.createComponent(SesionUsuario);
   await fixture.whenStable();
   fixture.detectChanges();
   return fixture;
@@ -28,7 +28,7 @@ async function montar() {
 @Component({ template: '' })
 class PaginaLogin {}
 
-describe('UserSwitcher', () => {
+describe('SesionUsuario', () => {
   it('sin sesion muestra el enlace de inicio de sesion', async () => {
     const fixture = await montar();
     const texto = fixture.nativeElement.textContent ?? '';

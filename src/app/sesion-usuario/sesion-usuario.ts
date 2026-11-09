@@ -7,15 +7,16 @@ import { AutenticacionService, ETIQUETA_ROL, sesionStore } from '@projecthub/sha
  * Area de sesion del header. Solo sesion real (10.3): muestra el usuario
  * autenticado, sus roles y los botones de perfil y cierre; sin sesion
  * ofrece el acceso al login. La identidad la determina el backend (10.2):
- * no existe cambio de usuario sin credenciales.
+ * no existe cambio de usuario sin credenciales. Nombre moderno del antiguo
+ * user-switcher, que si dejo de ser un selector mock (it. 55).
  */
 @Component({
-  selector: 'app-user-switcher',
+  selector: 'app-sesion-usuario',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [MatButton, RouterLink],
   template: `
     @if (sesion.usuarioActivo(); as actor) {
-      <div class="user-switcher real">
+      <div class="sesion-usuario real">
         <span class="nombre">{{ actor.nombre }}</span>
         <span class="roles">
           @for (rol of actor.roles; track $index) {
@@ -35,7 +36,7 @@ import { AutenticacionService, ETIQUETA_ROL, sesionStore } from '@projecthub/sha
   `,
   styles: [
     `
-      .user-switcher {
+      .sesion-usuario {
         display: flex;
         align-items: center;
         gap: 0.5rem;
@@ -72,7 +73,7 @@ import { AutenticacionService, ETIQUETA_ROL, sesionStore } from '@projecthub/sha
     `,
   ],
 })
-export class UserSwitcher {
+export class SesionUsuario {
   protected readonly sesion = sesionStore();
   protected readonly auth = inject(AutenticacionService);
   protected readonly ETIQUETA_ROL = ETIQUETA_ROL;

@@ -4,10 +4,10 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { filter, map, startWith } from 'rxjs';
 import { ApiEnlaceService, AutenticacionService } from '@projecthub/shared';
 import { PermissionBanner } from '@projecthub/ui';
-import { UserSwitcher } from './user-switcher/user-switcher';
+import { SesionUsuario } from './sesion-usuario/sesion-usuario';
 
 @Component({
-  imports: [RouterOutlet, RouterLink, UserSwitcher, PermissionBanner],
+  imports: [RouterOutlet, RouterLink, SesionUsuario, PermissionBanner],
   selector: 'app-root',
   changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './app.scss',
