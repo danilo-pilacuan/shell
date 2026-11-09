@@ -8,7 +8,7 @@ import { AutenticacionService, ETIQUETA_ROL, sesionStore } from '@projecthub/sha
  * autenticado, sus roles y los botones de perfil y cierre; sin sesion
  * ofrece el acceso al login. La identidad la determina el backend (10.2):
  * no existe cambio de usuario sin credenciales. Nombre moderno del antiguo
- * user-switcher, que si dejo de ser un selector mock (it. 55).
+ * user-switcher, que dejo de ser un selector mock (it. 55).
  */
 @Component({
   selector: 'app-sesion-usuario',

@@ -4,8 +4,8 @@ import { ActivatedRoute } from '@angular/router';
 /**
  * Vista "sin permisos" (docs/funcionalidades.md 1.7): se muestra cuando el
  * rol del usuario activo no esta habilitado para la seccion solicitada.
- * El resto de la aplicacion sigue funcionando; el selector de sesion permite
- * cambiar de usuario sin recargar.
+ * El resto de la aplicacion sigue funcionando; para cambiar de identidad se
+ * cierra la sesion y se vuelve a autenticar con otras credenciales (10.2).
  */
 @Component({
   selector: 'app-sin-permisos',
@@ -21,8 +21,8 @@ import { ActivatedRoute } from '@angular/router';
         }
       </p>
       <p>
-        Pide a un administrador que asigne el rol requerido, o cambia de
-        usuario con el selector de sesion.
+        Pide a un administrador que asigne el rol requerido, o cierra la
+        sesion y autenticate con un usuario habilitado.
         @if (destino) {
           Intenta de nuevo desde <code>/{{ destino }}</code
           >.
