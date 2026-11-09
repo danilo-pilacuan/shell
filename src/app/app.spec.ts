@@ -51,13 +51,14 @@ describe('App', () => {
     ]);
   });
 
-  it('incluye el selector de usuario activo en el header', async () => {
+  it('no incluye selector de usuario activo (herencia mock eliminada)', async () => {
     const fixture = TestBed.createComponent(App);
     await fixture.whenStable();
     const compiled = fixture.nativeElement as HTMLElement;
 
     const selector = compiled.querySelector('app-user-switcher mat-select');
-    expect(selector).not.toBeNull();
+    expect(selector).toBeNull();
+    expect(compiled.textContent).not.toContain('Usuario activo');
   });
 
   it('oculta el banner de backend caido cuando la API responde', async () => {
@@ -70,7 +71,7 @@ describe('App', () => {
     expect(compiled.querySelector('.shell-banner-api')).toBeNull();
   });
 
-  it('muestra el banner de modo demo cuando el backend no responde', async () => {
+  it('muestra el banner de datos locales de referencia cuando el backend no responde', async () => {
     const fixture = TestBed.createComponent(App);
     const enlace = TestBed.inject(ApiEnlaceService);
     enlace.marcar(false);
@@ -80,7 +81,7 @@ describe('App', () => {
     const banner = compiled.querySelector('.shell-banner-api');
     expect(banner).not.toBeNull();
     expect(banner?.textContent).toContain('Sin conexion con el backend');
-    expect(banner?.textContent).toContain('modo demo');
+    expect(banner?.textContent).toContain('datos locales de referencia');
   });
 
   it('el banner desaparece cuando el backend se recupera (sondeo de salud)', async () => {

@@ -14,10 +14,10 @@ import {
 
 /**
  * Guard de permisos (docs/funcionalidades.md 1.7): evalua si el rol del
- * usuario activo habilita una accion segun la etapa configurada en
- * route.data. Si no hay sesion redirige al dashboard; si hay sesion pero
- * sin permiso redirige a la vista "sin permisos" conservando el destino
- * en el query param `de`.
+ * usuario autenticado habilita una accion segun la etapa configurada en
+ * route.data. Sin sesion redirige a /login; con sesion pero sin permiso
+ * redirige a la vista "sin permisos" conservando el destino en el query
+ * param `de`.
  */
 export const permisoGuard: CanActivateFn = (
   route: ActivatedRouteSnapshot,
@@ -32,7 +32,7 @@ export const permisoGuard: CanActivateFn = (
   const router = inject(Router);
 
   if (!sesion.haySesion()) {
-    return router.createUrlTree(['/']);
+    return router.createUrlTree(['/login']);
   }
 
   const roles = sesion.rolesActivos();

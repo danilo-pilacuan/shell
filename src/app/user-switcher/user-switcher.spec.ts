@@ -1,79 +1,62 @@
+import { Component } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { By } from '@angular/platform-browser';
 import { provideRouter, Router } from '@angular/router';
-import { MatSelect } from '@angular/material/select';
+import { SESION_STORE, Usuario } from '@projecthub/shared';
 import { UserSwitcher } from './user-switcher';
 
+/** Usuario autenticado de los tests (equivale a un login exitoso). */
+const DIANA: Usuario = {
+  id: 'u-admin',
+  nombre: 'Diana Admin',
+  correo: 'diana@projecthub.local',
+  roles: ['Admin'],
+  activo: true,
+};
+
+async function montar() {
+  await TestBed.configureTestingModule({
+    imports: [UserSwitcher],
+    providers: [provideRouter([{ path: 'login', component: PaginaLogin }])],
+  }).compileComponents();
+  const fixture = TestBed.createComponent(UserSwitcher);
+  await fixture.whenStable();
+  fixture.detectChanges();
+  return fixture;
+}
+
+/** Destino minimo de login para verificar la navegacion del cierre. */
+@Component({ template: '' })
+class PaginaLogin {}
+
 describe('UserSwitcher', () => {
-  it('ofrece solo usuarios activos de la semilla', async () => {
-    await TestBed.configureTestingModule({
-      imports: [UserSwitcher],
-    }).compileComponents();
-
-    const fixture = TestBed.createComponent(UserSwitcher);
-    await fixture.whenStable();
-    fixture.detectChanges();
-
-    const select = fixture.debugElement.query(By.css('mat-select'))
-      .componentInstance as MatSelect;
-
-    const opciones = select.options.map((o) => o.viewValue.trim());
-    // 6 activos + la opcion "Sin sesion"; Ivan Inactivo (u-inactivo) no aparece.
-    expect(opciones.length).toBe(7);
-    expect(opciones).toContain('Diana Admin');
-    expect(opciones).not.toContain('Ivan Inactivo');
-  });
-
-  it('cambia el usuario activo al seleccionar', async () => {
-    await TestBed.configureTestingModule({
-      imports: [UserSwitcher],
-    }).compileComponents();
-
-    const fixture = TestBed.createComponent(UserSwitcher);
-    await fixture.whenStable();
-
-    fixture.componentInstance.seleccionar('u-pm');
-    await fixture.whenStable();
-    fixture.detectChanges();
-
+  it('sin sesion muestra el enlace de inicio de sesion', async () => {
+    const fixture = await montar();
     const texto = fixture.nativeElement.textContent ?? '';
-    expect(texto).toContain('Project Manager');
+    expect(texto).toContain('Iniciar sesion');
+    expect(texto).not.toContain('Diana Admin');
   });
 
-  it('navega al destino guardado en ?de= al iniciar sesion', async () => {
-    await TestBed.configureTestingModule({
-      imports: [UserSwitcher],
-      providers: [
-        provideRouter([
-          { path: 'reports', loadComponent: () => Promise.resolve(UserSwitcher) },
-        ]),
-      ],
-    }).compileComponents();
-
-    const router = TestBed.inject(Router);
-    await router.navigate(['/'], { queryParams: { de: '/reports' } });
-
-    const fixture = TestBed.createComponent(UserSwitcher);
+  it('con sesion real muestra el usuario, sus roles y cerrar sesion', async () => {
+    const fixture = await montar();
+    TestBed.inject(SESION_STORE).fijarUsuario(DIANA);
     await fixture.whenStable();
-
-    fixture.componentInstance.seleccionar('u-admin');
-    await fixture.whenStable();
-
-    expect(TestBed.inject(Router).url).toBe('/reports');
+    fixture.detectChanges();
+    const texto = fixture.nativeElement.textContent ?? '';
+    expect(texto).toContain('Diana Admin');
+    expect(texto).toContain('Admin');
+    expect(texto).toContain('Cambiar contrasena');
+    expect(texto).toContain('Cerrar sesion');
+    expect(texto).not.toContain('Usuario activo');
   });
 
-  it('no navega si no hay destino guardado', async () => {
-    await TestBed.configureTestingModule({
-      imports: [UserSwitcher],
-      providers: [provideRouter([])],
-    }).compileComponents();
-
-    const fixture = TestBed.createComponent(UserSwitcher);
+  it('cerrarSesion limpia la sesion y navega a /login', async () => {
+    const fixture = await montar();
+    TestBed.inject(SESION_STORE).fijarUsuario(DIANA);
     await fixture.whenStable();
-
-    fixture.componentInstance.seleccionar('u-admin');
+    fixture.detectChanges();
+    (fixture.componentInstance as unknown as { cerrarSesion: () => void }).cerrarSesion();
     await fixture.whenStable();
-
-    expect(TestBed.inject(Router).url).toBe('/');
+    expect(TestBed.inject(SESION_STORE).haySesion()).toBe(false);
+    expect(TestBed.inject(Router).url).toBe('/login');
   });
 });

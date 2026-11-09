@@ -9,9 +9,8 @@ import { AutenticacionService, ErrorAutenticacion } from '@projecthub/shared';
  * Pantalla de login (docs/funcionalidades.md 10.3, fase 14). Valida las
  * credenciales contra el backend FastAPI (POST /api/auth/login); al entrar
  * reanuda la ruta guardada por sesionGuard en el query param `de`.
- * El backend no disponible se muestra como error y la app sigue navegable en
- * modo demo (degradacion elegante), pero las secciones protegidas exigen
- * sesion.
+ * El backend no disponible se muestra como error y las secciones protegidas
+ * exigen sesion.
  */
 @Component({
   selector: 'app-login',

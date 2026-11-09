@@ -17,8 +17,25 @@ import {
   SESION_STORE,
   SesionStore,
   TokenAlmacen,
+  Usuario,
 } from '@projecthub/shared';
 import { permisoGuard } from './permiso.guard';
+
+/** Usuario de sesion para los tests de guards. */
+function usuarioSesion(id: string, roles: Array<Usuario['roles'][number]>): Usuario {
+  const nombres: Record<string, string> = {
+    'u-admin': 'Diana Admin',
+    'u-pm': 'Paula ProjectManager',
+    'u-analista': 'Andres Analista',
+  };
+  return {
+    id,
+    nombre: nombres[id] ?? id,
+    correo: id + '@projecthub.local',
+    roles,
+    activo: true,
+  };
+}
 import { sesionGuard } from './sesion.guard';
 
 /** Snapshot minimo para invocar los guards funcionales en unit tests. */
@@ -48,7 +65,7 @@ describe('sesionGuard', () => {
   });
 
   it('permite navegar con sesion activa', () => {
-    TestBed.inject<SesionStore>(SESION_STORE).seleccionar('u-admin');
+    TestBed.inject<SesionStore>(SESION_STORE).fijarUsuario(usuarioSesion('u-admin', ['Admin']));
 
     const resultado = TestBed.runInInjectionContext(() =>
       sesionGuard(snapshot(), estado('/admin')),
@@ -65,7 +82,7 @@ describe('sesionGuard', () => {
     expect(router.serializeUrl(resultado as UrlTree)).toBe('/login?de=%2Fadmin');
   });
 
-  it('redirige al dashboard sin sesion cuando el backend no responde (modo demo)', () => {
+  it('redirige a /login sin sesion incluso sin backend (sesion real obligatoria)', () => {
     TestBed.inject(ApiEnlaceService).marcar(false);
 
     const router = TestBed.inject(Router);
@@ -73,7 +90,7 @@ describe('sesionGuard', () => {
       sesionGuard(snapshot(), estado('/admin')),
     );
     expect(resultado).not.toBe(true);
-    expect(router.serializeUrl(resultado as UrlTree)).toBe('/?de=%2Fadmin');
+    expect(router.serializeUrl(resultado as UrlTree)).toBe('/login?de=%2Fadmin');
   });
 
   it('permite navegar con token de sesion real aunque la sesion tarde en restaurarse', () => {
@@ -99,7 +116,7 @@ describe('permisoGuard', () => {
   });
 
   it('permite entrar a /admin con rol Admin', () => {
-    TestBed.inject<SesionStore>(SESION_STORE).seleccionar('u-admin');
+    TestBed.inject<SesionStore>(SESION_STORE).fijarUsuario(usuarioSesion('u-admin', ['Admin']));
 
     const resultado = TestBed.runInInjectionContext(() =>
       permisoGuard(snapshot({ roles: ['Admin'] }), estado('/admin')),
@@ -109,7 +126,7 @@ describe('permisoGuard', () => {
 
   it('redirige a /sin-permisos sin el rol requerido', () => {
     // Paula es ProjectManager: sin rol Admin.
-    TestBed.inject<SesionStore>(SESION_STORE).seleccionar('u-pm');
+    TestBed.inject<SesionStore>(SESION_STORE).fijarUsuario(usuarioSesion('u-pm', ['ProjectManager']));
 
     const router = TestBed.inject(Router);
     const resultado = TestBed.runInInjectionContext(() =>
@@ -121,7 +138,7 @@ describe('permisoGuard', () => {
 
   it('permite con modo matriz cuando el rol habilita la accion en la etapa', () => {
     // Diana Admin tiene SOLO_GOBERNANZA: habilita cancelarProyecto en Ejecucion.
-    TestBed.inject<SesionStore>(SESION_STORE).seleccionar('u-admin');
+    TestBed.inject<SesionStore>(SESION_STORE).fijarUsuario(usuarioSesion('u-admin', ['Admin']));
 
     const resultado = TestBed.runInInjectionContext(() =>
       permisoGuard(
@@ -134,7 +151,7 @@ describe('permisoGuard', () => {
 
   it('redirige a /sin-permisos en modo matriz sin permiso', () => {
     // Andres Analista no habilita cancelarProyecto en Ejecucion.
-    TestBed.inject<SesionStore>(SESION_STORE).seleccionar('u-analista');
+    TestBed.inject<SesionStore>(SESION_STORE).fijarUsuario(usuarioSesion('u-analista', ['Analista']));
 
     const resultado = TestBed.runInInjectionContext(() =>
       permisoGuard(

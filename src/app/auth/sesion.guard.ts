@@ -7,12 +7,11 @@ import {
 } from '@projecthub/shared';
 
 /**
- * Guard de sesion (docs/funcionalidades.md 1.7, extendido en fase 14):
- * sin usuario activo no hay navegacion a secciones protegidas.
- * - Con backend disponible: redirige a /login (autenticacion real) conservando
- *   el destino en `de` para reanudarlo tras iniciar sesion.
- * - Sin backend (modo demo, degradacion elegante): conserva el comportamiento
- *   previo (dashboard con el selector de sesion simulada).
+ * Guard de sesion (docs/funcionalidades.md 1.7, sesion real 10.3):
+ * sin usuario autenticado no hay navegacion a secciones protegidas;
+ * redirige a /login conservando el destino en `de` para reanudarlo tras
+ * iniciar sesion. Con token presente pero sesion aun restaurandose se
+ * concede el paso (la restauracion ocurre en el app initializer).
  */
 export const sesionGuard: CanActivateFn = (_route, state) => {
   const sesion = sesionStore();
@@ -27,6 +26,5 @@ export const sesionGuard: CanActivateFn = (_route, state) => {
     // Token presente con sesion aun restaurandose; se concede el paso.
     return true;
   }
-  const destino = enlace.disponible ? '/login' : '/';
-  return router.createUrlTree([destino], { queryParams: { de: state.url } });
+  return router.createUrlTree(['/login'], { queryParams: { de: state.url } });
 };
