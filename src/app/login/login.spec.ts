@@ -4,6 +4,7 @@ import { provideHttpClient } from '@angular/common/http';
 import {
   HttpTestingController,
   provideHttpClientTesting,
+  TestRequest,
 } from '@angular/common/http/testing';
 import { ActivatedRoute, provideRouter } from '@angular/router';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
@@ -11,6 +12,23 @@ import { TokenAlmacen } from '@projecthub/shared';
 import { Login } from './login';
 
 const LOGIN_URL = 'http://localhost:8100/api/auth/login';
+
+/** Colecciones que sincronizarStores descarga tras fijar la sesion (13.3). */
+const COLECCIONES_SYNC = ['usuarios', 'proyectos', 'etapas', 'entregables', 'bitacora'];
+
+/**
+ * Responde las 5 lecturas autoritativas del backend que sincronizarStores
+ * emite tras un login exitoso (it. 58); sin esto el HttpTestingController
+ * las reporta como peticiones abiertas y el test se cuelga.
+ */
+async function responderSincronizacion(httpMock: HttpTestingController): Promise<void> {
+  await new Promise((resolver) => setTimeout(resolver, 0));
+  for (const coleccion of COLECCIONES_SYNC) {
+    httpMock
+      .match(`http://localhost:8100/api/${coleccion}`)
+      .forEach((req: TestRequest) => req.flush([]));
+  }
+}
 
 describe('Login', () => {
   let fixture: ReturnType<typeof TestBed.createComponent<Login>>;
@@ -92,6 +110,7 @@ describe('Login', () => {
         activo: true,
       },
     });
+    await responderSincronizacion(TestBed.inject(HttpTestingController));
     await fixture.whenStable();
     fixture.detectChanges();
     expect(TestBed.inject(TokenAlmacen).leer()).toBe('jwt-e2e');
